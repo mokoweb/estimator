@@ -1,41 +1,43 @@
-const getInfectionsByRequestedTime = (periodType, timeToElapse) => {
+const getInfectionsByRequestedTime = (multiplier, data) => {
   let noOfDays = 0;
 
-  switch (periodType) {
+  switch (data.periodType) {
     case 'days':
-      noOfDays = timeToElapse / 3;
+      noOfDays = data.timeToElapse / 3;
       break;
 
     case 'weeks':
-      noOfDays = (timeToElapse * 7) / 3;
+      noOfDays = (data.timeToElapse * 7) / 3;
       break;
 
     case 'months':
-      noOfDays = (timeToElapse * 30) / 3;
+      noOfDays = (data.timeToElapse * 30) / 3;
       break;
 
     default:
       break;
   }
 
-  return (2 ** Math.trunc(noOfDays));
+  return ((2 ** Math.trunc(noOfDays)) * data.reportedCases * multiplier);
 };
 
-const covid19ImpactEstimator = (data) => {
-  const input = data;
-  return {
-    data: input,
-    impact: {
-      currentlyInfected: data.reportedCases * 10,
-      infectionsByRequestedTime: (data.reportedCases * 10)
-        * getInfectionsByRequestedTime(data.periodType, data.timeToElapse)
-    },
-    severeImpact: {
-      currentlyInfected: data.reportedCases * 50,
-      infectionsByRequestedTime: (data.reportedCases * 50)
-        * getInfectionsByRequestedTime(data.periodType, data.timeToElapse)
-    }
-  };
-};
+const hospitalBedsByRequestedTime = (data, multiplier) => 0.35
+* (getInfectionsByRequestedTime(multiplier, data) * 0.15) - data.totalHospitalBeds;
+
+const covid19ImpactEstimator = (data) => ({
+  data,
+  impact: {
+    currentlyInfected: data.reportedCases * 10,
+    infectionsByRequestedTime: getInfectionsByRequestedTime(10, data),
+    severeCasesByRequestedTime: getInfectionsByRequestedTime(10, data) * 0.15,
+    hospitalBedsByRequestedTime: hospitalBedsByRequestedTime(data, 10)
+  },
+  severeImpact: {
+    currentlyInfected: data.reportedCases * 50,
+    infectionsByRequestedTime: getInfectionsByRequestedTime(50, data),
+    severeCasesByRequestedTime: getInfectionsByRequestedTime(50, data) * 0.15,
+    hospitalBedsByRequestedTime: hospitalBedsByRequestedTime(data, 50)
+  }
+});
 
 export default covid19ImpactEstimator;
