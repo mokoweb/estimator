@@ -1,4 +1,4 @@
-const getInfectionsByRequestedTime = (periodType, timeToElapse) => {
+const getDaysFromPeriodType = (periodType, timeToElapse) => {
   let noOfDays = 0;
 
   switch (periodType) {
@@ -18,10 +18,12 @@ const getInfectionsByRequestedTime = (periodType, timeToElapse) => {
       break;
   }
 
-  return (2 ** Math.trunc(noOfDays));
+  return Math.trunc(noOfDays);
 };
 
 const covid19ImpactEstimator = (data) => {
+  const noOfDays = getDaysFromPeriodType(data.periodType, data.timeToElapse);
+  const getInfectionsByRequestedTime = 2 ** noOfDays;
   const currentlyInfected = data.reportedCases * 10;
   const severeCurrentlyInfected = data.reportedCases * 50;
   const infectionsByRequestedTime = currentlyInfected * getInfectionsByRequestedTime(
@@ -41,6 +43,14 @@ const covid19ImpactEstimator = (data) => {
   const severeHospitalBedsByRequestedTime = Math.trunc(
     availableBedSpace - severeImpactSevereCasesByRequestedTime
   );
+  const casesForICUByRequestedTime = infectionsByRequestedTime * 0.05;
+  const severeCasesForICUByRequestedTime = severeInfectionsByRequestedTime * 0.05;
+  const casesForVentilatorsByRequestedTime = infectionsByRequestedTime * 0.02;
+  const severeCasesForVentilatorsByRequestedTime = severeInfectionsByRequestedTime * 0.02;
+  const dollarsInFlight = (infectionsByRequestedTime * data.avgDailyIncomePopulation)
+  * data.avgDailyIncomeInUSD * noOfDays;
+  const severeDollarsInFlight = (severeInfectionsByRequestedTime * data.avgDailyIncomePopulation)
+  * data.avgDailyIncomeInUSD * noOfDays;
 
   return {
     data,
@@ -48,13 +58,19 @@ const covid19ImpactEstimator = (data) => {
       currentlyInfected,
       infectionsByRequestedTime,
       severeCasesByRequestedTime: impactSevereCasesByRequestedTime,
-      hospitalBedsByRequestedTime
+      hospitalBedsByRequestedTime,
+      casesForICUByRequestedTime,
+      casesForVentilatorsByRequestedTime,
+      dollarsInFlight
     },
     severeImpact: {
       currentlyInfected: severeCurrentlyInfected,
       infectionsByRequestedTime: severeInfectionsByRequestedTime,
       severeCasesByRequestedTime: severeImpactSevereCasesByRequestedTime,
-      hospitalBedsByRequestedTime: severeHospitalBedsByRequestedTime
+      hospitalBedsByRequestedTime: severeHospitalBedsByRequestedTime,
+      casesForICUByRequestedTime: severeCasesForICUByRequestedTime,
+      casesForVentilatorsByRequestedTime: severeCasesForVentilatorsByRequestedTime,
+      dollarsInFlight: severeDollarsInFlight
     }
   };
 };
