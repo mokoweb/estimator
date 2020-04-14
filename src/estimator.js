@@ -1,6 +1,5 @@
 const getDaysFromPeriodType = (periodType, timeToElapse) => {
   let noOfDays = 0;
-
   switch (periodType) {
     case 'days':
       noOfDays = timeToElapse;
