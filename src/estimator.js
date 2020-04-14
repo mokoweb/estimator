@@ -1,4 +1,4 @@
-const daysNormalize = (periodType, timeToElapse) => {
+const getDaysFromPeriodType = (periodType, timeToElapse) => {
   let noOfDays = 0;
 
   switch (periodType) {
@@ -23,7 +23,7 @@ const daysNormalize = (periodType, timeToElapse) => {
 const covid19ImpactEstimator = (data) => {
   const currentlyInfected = data.reportedCases * 10;
   const severeCurrentlyInfected = data.reportedCases * 50;
-  const noOfDays = daysNormalize(data.periodType, data.timeToElapse);
+  const noOfDays = getDaysFromPeriodType(data.periodType, data.timeToElapse);
   const infectionsByRequestedTime = Math.trunc(currentlyInfected * (2 ** Math.trunc(
     noOfDays / 3
   )));
